@@ -1,39 +1,61 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { globalColors, globalStyles } from "@/theme/theme";
+import {
+  DrawerContentScrollView,
+  DrawerItemList,
+} from "@react-navigation/drawer";
+import { Drawer } from "expo-router/drawer";
+import { useWindowDimensions, View } from "react-native";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+export default function Layout() {
+  const dimensions = useWindowDimensions();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Drawer
+      drawerContent={(props) => <CustomDraw {...props} />}
+      screenOptions={{
+        headerShown: false,
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: "#f5f3f3",
+        },
+
+        drawerType: dimensions.width >= 758 ? "permanent" : "slide",
+        drawerStyle: {
+          backgroundColor: globalColors.background,
+          width: 280,
+        }, // 🎨 Personaliza el drawer
+        drawerActiveTintColor: "#007bff", // 🔹 Color del texto cuando está activo
+        drawerInactiveTintColor: "#333", // 🔹 Color cuando está inactivo
+      }}
+    >
+      <Drawer.Screen name="index" options={{ title: "🏡 Home" }} />
+      <Drawer.Screen
+        name="screens/products/index"
+        options={{ title: "🛒 Products" }}
+      />
+      <Drawer.Screen
+        name="screens/products/[id]"
+        options={{ title: "📦 Product Details" }}
+      />
+      <Drawer.Screen
+        name="screens/profile/index"
+        options={{ title: "Perfil" }}
+      />
+    </Drawer>
   );
 }
+
+const CustomDraw = (props: any) => {
+  return (
+    <DrawerContentScrollView>
+      <View
+        style={{
+          height: 200,
+          backgroundColor: globalColors.primary,
+          margin: 30,
+          borderRadius: 30,
+        }}
+      />
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+};
